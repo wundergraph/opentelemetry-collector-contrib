@@ -228,86 +228,6 @@ The current phase of namespaces (1 for active and 0 for terminating)
 | ---- | ----------- | ---------- |
 | 1 | Gauge | Int |
 
-### k8s.node.allocatable_cpu
-
-How many CPU cores remaining that the node can allocate to pods
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| {cores} | Gauge | Double |
-
-### k8s.node.allocatable_ephemeral_storage
-
-How many bytes of ephemeral storage remaining that the node can allocate to pods
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| By | Gauge | Int |
-
-### k8s.node.allocatable_memory
-
-How many bytes of RAM memory remaining that the node can allocate to pods
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| By | Gauge | Int |
-
-### k8s.node.allocatable_pods
-
-How many pods remaining the node can allocate
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| {pods} | Gauge | Int |
-
-### k8s.node.allocatable_storage
-
-How many bytes of storage remaining that the node can allocate to pods
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| By | Gauge | Int |
-
-### k8s.node.condition_disk_pressure
-
-Whether this node is DiskPressure (1), not DiskPressure (0) or in an unknown state (-1)
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Int |
-
-### k8s.node.condition_memory_pressure
-
-Whether this node is MemoryPressure (1), not MemoryPressure (0) or in an unknown state (-1)
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Int |
-
-### k8s.node.condition_network_unavailable
-
-Whether this node is NetworkUnavailable (1), not NetworkUnavailable (0) or in an unknown state (-1)
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Int |
-
-### k8s.node.condition_pid_pressure
-
-Whether this node is PidPressure (1), not PidPressure (0) or in an unknown state (-1)
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Int |
-
-### k8s.node.condition_ready
-
-Whether this node is Ready (1), not Ready (0) or in an unknown state (-1)
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Int |
-
 ### k8s.pod.phase
 
 Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
@@ -465,6 +385,24 @@ The usage for a particular resource with a configured limit.
 | Name | Description | Values |
 | ---- | ----------- | ------ |
 | resource | the name of the resource on which the quota is applied | Any Str |
+
+## Optional Metrics
+
+The following metrics are not emitted by default. Each of them can be enabled by applying the following configuration:
+
+```yaml
+metrics:
+  <metric_name>:
+    enabled: true
+```
+
+### k8s.pod.status_reason
+
+Current status reason of the pod (1 - Evicted, 2 - NodeAffinity, 3 - NodeLost, 4 - Shutdown, 5 - UnexpectedAdmissionError, 6 - Unknown)
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
 
 ## Resource Attributes
 
