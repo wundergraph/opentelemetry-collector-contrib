@@ -19,7 +19,7 @@ import (
 	"go.opentelemetry.io/collector/receiver/receivertest"
 	"go.uber.org/zap"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver/internal/mocks"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver/internal/models"
@@ -35,7 +35,7 @@ func TestScraperStart(t *testing.T) {
 			desc: "Bad Config",
 			scraper: &rabbitmqScraper{
 				cfg: &Config{
-					HTTPClientSettings: confighttp.HTTPClientSettings{
+					HTTPClientConfig: confighttp.HTTPClientConfig{
 						Endpoint: defaultEndpoint,
 						TLSSetting: configtls.TLSClientSetting{
 							TLSSetting: configtls.TLSSetting{
@@ -52,7 +52,7 @@ func TestScraperStart(t *testing.T) {
 			desc: "Valid Config",
 			scraper: &rabbitmqScraper{
 				cfg: &Config{
-					HTTPClientSettings: confighttp.HTTPClientSettings{
+					HTTPClientConfig: confighttp.HTTPClientConfig{
 						TLSSetting: configtls.TLSClientSetting{},
 						Endpoint:   defaultEndpoint,
 					},

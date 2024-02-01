@@ -24,7 +24,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter/internal/translation"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
@@ -102,7 +102,7 @@ func TestCreateMetricsExporter_CustomConfig(t *testing.T) {
 	config := &Config{
 		AccessToken: "testToken",
 		Realm:       "us1",
-		HTTPClientSettings: confighttp.HTTPClientSettings{
+		HTTPClientConfig: confighttp.HTTPClientConfig{
 			Timeout: 2 * time.Second,
 			Headers: map[string]configopaque.String{
 				"added-entry": "added value",
@@ -615,7 +615,7 @@ func getMetrics(metrics []map[string]string) pmetric.Metrics {
 	return md
 }
 
-func testReadJSON(f string, v interface{}) error {
+func testReadJSON(f string, v any) error {
 	bytes, err := os.ReadFile(f)
 	if err != nil {
 		return err

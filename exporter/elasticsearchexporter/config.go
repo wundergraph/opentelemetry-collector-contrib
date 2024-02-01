@@ -56,18 +56,25 @@ type Config struct {
 	// https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html
 	Pipeline string `mapstructure:"pipeline"`
 
-	HTTPClientSettings `mapstructure:",squash"`
-	Discovery          DiscoverySettings `mapstructure:"discover"`
-	Retry              RetrySettings     `mapstructure:"retry"`
-	Flush              FlushSettings     `mapstructure:"flush"`
-	Mapping            MappingsSettings  `mapstructure:"mapping"`
+	HTTPClientConfig `mapstructure:",squash"`
+	Discovery        DiscoverySettings      `mapstructure:"discover"`
+	Retry            RetrySettings          `mapstructure:"retry"`
+	Flush            FlushSettings          `mapstructure:"flush"`
+	Mapping          MappingsSettings       `mapstructure:"mapping"`
+	LogstashFormat   LogstashFormatSettings `mapstructure:"logstash_format"`
+}
+
+type LogstashFormatSettings struct {
+	Enabled         bool   `mapstructure:"enabled"`
+	PrefixSeparator string `mapstructure:"prefix_separator"`
+	DateFormat      string `mapstructure:"date_format"`
 }
 
 type DynamicIndexSetting struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
-type HTTPClientSettings struct {
+type HTTPClientConfig struct {
 	Authentication AuthenticationSettings `mapstructure:",squash"`
 
 	// ReadBufferSize for HTTP client. See http.Transport.ReadBufferSize.

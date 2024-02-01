@@ -12,10 +12,10 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/extension/experimental/storage"
-	"go.opentelemetry.io/collector/obsreport"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/receiver"
+	"go.opentelemetry.io/collector/receiver/receiverhelper"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
@@ -37,7 +37,7 @@ type logsReceiver struct {
 
 	id            component.ID
 	storageClient storage.Client
-	obsrecv       *obsreport.Receiver
+	obsrecv       *receiverhelper.ObsReport
 }
 
 func newLogsReceiver(
@@ -48,7 +48,7 @@ func newLogsReceiver(
 	nextConsumer consumer.Logs,
 ) (*logsReceiver, error) {
 
-	obsr, err := obsreport.NewReceiver(obsreport.ReceiverSettings{
+	obsr, err := receiverhelper.NewObsReport(receiverhelper.ObsReportSettings{
 		ReceiverID:             settings.ID,
 		ReceiverCreateSettings: settings,
 	})
@@ -115,6 +115,7 @@ func (receiver *logsReceiver) createQueryReceivers() error {
 			receiver.createConnection,
 			receiver.createClient,
 			receiver.settings.Logger,
+			receiver.config.Telemetry,
 			receiver.storageClient,
 		)
 		receiver.queryReceivers = append(receiver.queryReceivers, queryReceiver)
@@ -202,6 +203,7 @@ type logsQueryReceiver struct {
 	createDb     dbProviderFunc
 	createClient clientProviderFunc
 	logger       *zap.Logger
+	telemetry    TelemetryConfig
 
 	db            *sql.DB
 	client        dbClient
@@ -217,6 +219,7 @@ func newLogsQueryReceiver(
 	dbProviderFunc dbProviderFunc,
 	clientProviderFunc clientProviderFunc,
 	logger *zap.Logger,
+	telemetry TelemetryConfig,
 	storageClient storage.Client,
 ) *logsQueryReceiver {
 	queryReceiver := &logsQueryReceiver{
@@ -225,6 +228,7 @@ func newLogsQueryReceiver(
 		createDb:      dbProviderFunc,
 		createClient:  clientProviderFunc,
 		logger:        logger,
+		telemetry:     telemetry,
 		storageClient: storageClient,
 	}
 	queryReceiver.trackingValue = queryReceiver.query.TrackingStartValue
@@ -242,7 +246,7 @@ func (queryReceiver *logsQueryReceiver) start(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to open db connection: %w", err)
 	}
-	queryReceiver.client = queryReceiver.createClient(dbWrapper{queryReceiver.db}, queryReceiver.query.SQL, queryReceiver.logger)
+	queryReceiver.client = queryReceiver.createClient(dbWrapper{queryReceiver.db}, queryReceiver.query.SQL, queryReceiver.logger, queryReceiver.telemetry)
 
 	queryReceiver.trackingValue = queryReceiver.retrieveTrackingValue(ctx)
 

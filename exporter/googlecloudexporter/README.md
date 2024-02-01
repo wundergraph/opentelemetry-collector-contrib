@@ -192,7 +192,6 @@ The following configuration options are supported:
     - `regex`: Match resource keys by regex.
   - `cumulative_normalization` (default = true): If true, normalizes cumulative metrics without start times or with explicit reset points by subtracting subsequent points from the initial point. It is enabled by default. Since it caches starting points, it may result inincreased memory usage.
   - `sum_of_squared_deviation` (default = false): If true, enables calculation of an estimated sum of squared deviation.  It is an estimate, and is not exact.
-  - `compression` (optional): Enable gzip compression for gRPC requests (valid vlaues: `gzip`).
   - `experimental_wal` (default = []): If provided, enables use of a write ahead
     log for time series requests.
     - `directory` (default = `./`): Path to local directory for WAL file.
@@ -200,7 +199,6 @@ The following configuration options are supported:
       errors (`UNAVAILABLE` or `DEADLINE_EXCEEDED`).
 - `trace` (optional): Configuration for sending traces to Cloud Trace.
   - `endpoint` (default = cloudtrace.googleapis.com): Endpoint where trace data is going to be sent to.
-  - `compression` (optional): Compression format for Metrics gRPC requests. Supported values: [`gzip`].  Defaults to no compression.
   - `grpc_pool_size` (optional): Sets the size of the connection pool in the GCP client. Defaults to a single connection.
   - `use_insecure` (default = false): If true, disables gRPC client transport security. Only has effect if Endpoint is not "".
   - `attribute_mappings` (optional): AttributeMappings determines how to map from OpenTelemetry attribute keys to Google Cloud Trace keys.  By default, it changes http and service keys so that they appear more prominently in the UI.

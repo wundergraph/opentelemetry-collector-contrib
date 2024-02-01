@@ -128,17 +128,17 @@ service:
       exporters: [prometheusremotewrite]`, serverURL.Host, prweServer.URL)
 
 	confFile, err := os.CreateTemp(os.TempDir(), "conf-")
-	require.Nil(t, err)
+	require.NoError(t, err)
 	defer os.Remove(confFile.Name())
 	_, err = confFile.Write([]byte(cfg))
-	require.Nil(t, err)
+	require.NoError(t, err)
 	// 4. Run the OpenTelemetry Collector.
 	receivers, err := receiver.MakeFactoryMap(prometheusreceiver.NewFactory())
-	require.Nil(t, err)
+	require.NoError(t, err)
 	exporters, err := exporter.MakeFactoryMap(prometheusremotewriteexporter.NewFactory())
-	require.Nil(t, err)
+	require.NoError(t, err)
 	processors, err := processor.MakeFactoryMap(batchprocessor.NewFactory())
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	factories := otelcol.Factories{
 		Receivers:  receivers,
@@ -157,7 +157,7 @@ service:
 	require.NoError(t, err)
 
 	appSettings := otelcol.CollectorSettings{
-		Factories:      factories,
+		Factories:      func() (otelcol.Factories, error) { return factories, nil },
 		ConfigProvider: configProvider,
 		BuildInfo: component.BuildInfo{
 			Command:     "otelcol",
@@ -173,7 +173,7 @@ service:
 	}
 
 	app, err := otelcol.NewCollector(appSettings)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	go func() {
 		assert.NoError(t, app.Run(context.Background()))

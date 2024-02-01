@@ -60,6 +60,7 @@ func TestAddSingleGaugeNumberDataPoint(t *testing.T) {
 					metric,
 					Settings{},
 					gotSeries,
+					metric.Name(),
 				)
 			}
 			assert.Equal(t, tt.want(), gotSeries)
@@ -162,7 +163,7 @@ func TestAddSingleSumNumberDataPoint(t *testing.T) {
 					timeSeriesSignature(pmetric.MetricTypeSum.String(), &createdLabels): {
 						Labels: createdLabels,
 						Samples: []prompb.Sample{
-							{Value: float64(convertTimeStamp(ts))},
+							{Value: float64(convertTimeStamp(ts)), Timestamp: convertTimeStamp(ts)},
 						},
 					},
 				}
@@ -236,6 +237,7 @@ func TestAddSingleSumNumberDataPoint(t *testing.T) {
 					metric,
 					Settings{ExportCreatedMetric: true},
 					got,
+					metric.Name(),
 				)
 			}
 			assert.Equal(t, tt.want(), got)

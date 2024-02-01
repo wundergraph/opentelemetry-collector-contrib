@@ -8,11 +8,13 @@ import (
 	"fmt"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.uber.org/zap"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog"
@@ -44,16 +46,27 @@ type datadogProcessor struct {
 	exit chan struct{}
 }
 
-func newProcessor(ctx context.Context, logger *zap.Logger, config component.Config, nextConsumer consumer.Traces) (*datadogProcessor, error) {
+func newProcessor(ctx context.Context, set component.TelemetrySettings, config component.Config, nextConsumer consumer.Traces) (*datadogProcessor, error) {
 	cfg := config.(*Config)
 	in := make(chan *pb.StatsPayload, 100)
-	trans, err := metrics.NewTranslator(logger)
+	set.MeterProvider = noop.NewMeterProvider() // disable metrics for the processor
+	attributesTranslator, err := attributes.NewTranslator(set)
 	if err != nil {
 		return nil, err
 	}
-	logger.Warn("This component is deprecated in favor of the Datadog connector")
+	trans, err := metrics.NewTranslator(set, attributesTranslator)
+	if err != nil {
+		return nil, err
+	}
+	set.Logger.Warn(
+		"The datadogprocessor has been deprecated in favor of the datadogconnector",
+		zap.String(
+			"documentation",
+			"https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/datadogprocessor/README.md#deprecated-in-favor-of-datadogconnector",
+		),
+	)
 	return &datadogProcessor{
-		logger:       logger,
+		logger:       set.Logger,
 		nextConsumer: nextConsumer,
 		agent:        datadog.NewAgent(ctx, in),
 		translator:   trans,

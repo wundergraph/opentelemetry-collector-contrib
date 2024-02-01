@@ -21,21 +21,31 @@ func NewFactory() connector.Factory {
 	return connector.NewFactory(
 		metadata.Type,
 		createDefaultConfig,
-		connector.WithTracesToMetrics(createTracesToMetricsConnector, metadata.TracesToMetricsStability))
+		connector.WithTracesToMetrics(createTracesToMetricsConnector, metadata.TracesToMetricsStability),
+		connector.WithTracesToTraces(createTracesToTracesConnector, metadata.TracesToTracesStability))
 }
 
-var _ component.Config = (*Config)(nil)
-
-type Config struct{}
-
 func createDefaultConfig() component.Config {
-	return &Config{}
+	return &Config{
+		Traces: TracesConfig{
+			IgnoreResources: []string{},
+			TraceBuffer:     1000,
+		},
+	}
 }
 
 // defines the consumer type of the connector
 // we want to consume traces and export metrics therefore define nextConsumer as metrics, consumer is the next component in the pipeline
 func createTracesToMetricsConnector(_ context.Context, params connector.CreateSettings, cfg component.Config, nextConsumer consumer.Metrics) (connector.Traces, error) {
-	c, err := newConnector(params.Logger, cfg, nextConsumer)
+	c, err := newConnector(params.TelemetrySettings, cfg, nextConsumer, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+func createTracesToTracesConnector(_ context.Context, params connector.CreateSettings, cfg component.Config, nextConsumer consumer.Traces) (connector.Traces, error) {
+	c, err := newConnector(params.TelemetrySettings, cfg, nil, nextConsumer)
 	if err != nil {
 		return nil, err
 	}

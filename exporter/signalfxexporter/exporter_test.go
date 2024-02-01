@@ -67,18 +67,18 @@ func TestNew(t *testing.T) {
 		{
 			name: "successfully create exporter",
 			config: &Config{
-				AccessToken:        "someToken",
-				Realm:              "xyz",
-				HTTPClientSettings: confighttp.HTTPClientSettings{Timeout: 1 * time.Second},
+				AccessToken:      "someToken",
+				Realm:            "xyz",
+				HTTPClientConfig: confighttp.HTTPClientConfig{Timeout: 1 * time.Second},
 			},
 		},
 		{
 			name: "create exporter with host metadata syncer",
 			config: &Config{
-				AccessToken:        "someToken",
-				Realm:              "xyz",
-				HTTPClientSettings: confighttp.HTTPClientSettings{Timeout: 1 * time.Second},
-				SyncHostMetadata:   true,
+				AccessToken:      "someToken",
+				Realm:            "xyz",
+				HTTPClientConfig: confighttp.HTTPClientConfig{Timeout: 1 * time.Second},
+				SyncHostMetadata: true,
 			},
 		},
 	}
@@ -180,7 +180,7 @@ func TestConsumeMetrics(t *testing.T) {
 			assert.NoError(t, err)
 
 			cfg := &Config{
-				HTTPClientSettings: confighttp.HTTPClientSettings{
+				HTTPClientConfig: confighttp.HTTPClientConfig{
 					Timeout: 1 * time.Second,
 					Headers: map[string]configopaque.String{"test_header_": "test"},
 				},
@@ -196,7 +196,7 @@ func TestConsumeMetrics(t *testing.T) {
 				sfxClientBase: sfxClientBase{
 					ingestURL: serverURL,
 					client:    client,
-					zippers: sync.Pool{New: func() interface{} {
+					zippers: sync.Pool{New: func() any {
 						return gzip.NewWriter(nil)
 					}},
 				},
@@ -402,11 +402,11 @@ func TestConsumeMetricsWithAccessTokenPassthrough(t *testing.T) {
 			cfg := factory.CreateDefaultConfig().(*Config)
 			cfg.IngestURL = server.URL
 			cfg.APIURL = server.URL
-			cfg.HTTPClientSettings.Headers = make(map[string]configopaque.String)
+			cfg.HTTPClientConfig.Headers = make(map[string]configopaque.String)
 			for k, v := range tt.additionalHeaders {
-				cfg.HTTPClientSettings.Headers[k] = configopaque.String(v)
+				cfg.HTTPClientConfig.Headers[k] = configopaque.String(v)
 			}
-			cfg.HTTPClientSettings.Headers["test_header_"] = configopaque.String(tt.name)
+			cfg.HTTPClientConfig.Headers["test_header_"] = configopaque.String(tt.name)
 			cfg.AccessToken = configopaque.String(fromHeaders)
 			cfg.AccessTokenPassthrough = tt.accessTokenPassthrough
 			sfxExp, err := NewFactory().CreateMetricsExporter(context.Background(), exportertest.NewNopCreateSettings(), cfg)
@@ -441,9 +441,9 @@ func TestNewEventExporter(t *testing.T) {
 	assert.Nil(t, got)
 
 	cfg := &Config{
-		AccessToken:        "someToken",
-		Realm:              "xyz",
-		HTTPClientSettings: confighttp.HTTPClientSettings{Timeout: 1 * time.Second},
+		AccessToken:      "someToken",
+		Realm:            "xyz",
+		HTTPClientConfig: confighttp.HTTPClientConfig{Timeout: 1 * time.Second},
 	}
 
 	got, err = newEventExporter(cfg, exportertest.NewNopCreateSettings())
@@ -557,7 +557,7 @@ func TestConsumeEventData(t *testing.T) {
 			assert.NoError(t, err)
 
 			cfg := &Config{
-				HTTPClientSettings: confighttp.HTTPClientSettings{
+				HTTPClientConfig: confighttp.HTTPClientConfig{
 					Timeout: 1 * time.Second,
 					Headers: map[string]configopaque.String{"test_header_": "test"},
 				},
@@ -736,7 +736,7 @@ func TestConsumeMetadata(t *testing.T) {
 		metadata []*metadata.MetadataUpdate
 	}
 	type fields struct {
-		payLoad map[string]interface{}
+		payLoad map[string]any
 	}
 	tests := []struct {
 		name                   string
@@ -751,8 +751,8 @@ func TestConsumeMetadata(t *testing.T) {
 		{
 			name: "Test property updates",
 			fields: fields{
-				map[string]interface{}{
-					"customProperties": map[string]interface{}{
+				map[string]any{
+					"customProperties": map[string]any{
 						"prop.erty1": "val1",
 						"property2":  nil,
 						"prop.erty3": "val33",
@@ -811,12 +811,12 @@ func TestConsumeMetadata(t *testing.T) {
 		{
 			name: "Test tag updates",
 			fields: fields{
-				map[string]interface{}{
-					"customProperties": map[string]interface{}{},
-					"tags": []interface{}{
+				map[string]any{
+					"customProperties": map[string]any{},
+					"tags": []any{
 						"tag.1",
 					},
-					"tagsToRemove": []interface{}{
+					"tagsToRemove": []any{
 						"tag/2",
 					},
 				},
@@ -853,16 +853,16 @@ func TestConsumeMetadata(t *testing.T) {
 		{
 			name: "Test quick successive updates",
 			fields: fields{
-				map[string]interface{}{
-					"customProperties": map[string]interface{}{
+				map[string]any{
+					"customProperties": map[string]any{
 						"property1": nil,
 						"property2": "val2",
 						"property3": nil,
 					},
-					"tags": []interface{}{
+					"tags": []any{
 						"tag/2",
 					},
-					"tagsToRemove": []interface{}{
+					"tagsToRemove": []any{
 						"tag.1",
 					},
 				},
@@ -923,8 +923,8 @@ func TestConsumeMetadata(t *testing.T) {
 		{
 			name: "Test updates on dimensions with nonalphanumeric characters (other than the default allow list)",
 			fields: fields{
-				map[string]interface{}{
-					"customProperties": map[string]interface{}{
+				map[string]any{
+					"customProperties": map[string]any{
 						"prop.erty1": "val1",
 						"property2":  nil,
 						"prop.erty3": "val33",
@@ -1012,7 +1012,7 @@ func TestConsumeMetadata(t *testing.T) {
 				assert.Equal(t, tt.expectedDimensionKey, dimPair[0])
 				assert.Equal(t, tt.expectedDimensionValue, dimPair[1])
 
-				p := map[string]interface{}{
+				p := map[string]any{
 					"customProperties": map[string]*string{},
 					"tags":             []string{},
 					"tagsToRemove":     []string{},
@@ -1098,7 +1098,7 @@ func BenchmarkExporterConsumeData(b *testing.B) {
 			client: &http.Client{
 				Timeout: 1 * time.Second,
 			},
-			zippers: sync.Pool{New: func() interface{} {
+			zippers: sync.Pool{New: func() any {
 				return gzip.NewWriter(nil)
 			}},
 		},

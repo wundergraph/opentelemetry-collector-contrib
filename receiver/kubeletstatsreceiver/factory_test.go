@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //go:build !windows
-// +build !windows
 
 // TODO review if tests should succeed on Windows
 
@@ -140,7 +139,7 @@ func TestCustomUnmarshaller(t *testing.T) {
 		args                  args
 		result                *Config
 		mockUnmarshallFailure bool
-		configOverride        map[string]interface{}
+		configOverride        map[string]any
 		wantErr               bool
 	}{
 		{
@@ -184,7 +183,7 @@ func TestCustomUnmarshaller(t *testing.T) {
 					},
 				},
 			},
-			configOverride: map[string]interface{}{
+			configOverride: map[string]any{
 				"metric_groups":       []string{string(kubelet.ContainerMetricGroup)},
 				"collection_interval": 20 * time.Second,
 			},
@@ -201,7 +200,7 @@ func TestCustomUnmarshaller(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.mockUnmarshallFailure {
 				// some arbitrary failure.
-				err := tt.args.componentParser.Merge(confmap.NewFromStringMap(map[string]interface{}{metricGroupsConfig: map[string]string{"foo": "bar"}}))
+				err := tt.args.componentParser.Merge(confmap.NewFromStringMap(map[string]any{metricGroupsConfig: map[string]string{"foo": "bar"}}))
 				require.NoError(t, err)
 			}
 

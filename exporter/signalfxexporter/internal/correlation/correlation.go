@@ -9,14 +9,14 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/signalfx/signalfx-agent/pkg/apm/correlations"
-	"github.com/signalfx/signalfx-agent/pkg/apm/tracetracker"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter/internal/apm/correlations"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter/internal/apm/tracetracker"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/timeutils"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk"
 )
@@ -51,9 +51,9 @@ func NewTracker(cfg *Config, accessToken configopaque.String, params exporter.Cr
 func newCorrelationClient(cfg *Config, accessToken configopaque.String, params exporter.CreateSettings, host component.Host) (
 	*correlationContext, error,
 ) {
-	corrURL, err := url.Parse(cfg.HTTPClientSettings.Endpoint)
+	corrURL, err := url.Parse(cfg.HTTPClientConfig.Endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse correlation endpoint URL %q: %w", cfg.HTTPClientSettings.Endpoint, err)
+		return nil, fmt.Errorf("failed to parse correlation endpoint URL %q: %w", cfg.HTTPClientConfig.Endpoint, err)
 	}
 
 	httpClient, err := cfg.ToClient(host, params.TelemetrySettings)
@@ -63,7 +63,7 @@ func newCorrelationClient(cfg *Config, accessToken configopaque.String, params e
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	client, err := correlations.NewCorrelationClient(newZapShim(params.Logger), ctx, httpClient, correlations.ClientConfig{
+	client, err := correlations.NewCorrelationClient(ctx, newZapShim(params.Logger), httpClient, correlations.ClientConfig{
 		Config:      cfg.Config,
 		AccessToken: string(accessToken),
 		URL:         corrURL,
@@ -108,7 +108,6 @@ func (cor *Tracker) AddSpans(ctx context.Context, traces ptrace.Traces) error {
 				hostDimension: hostID.ID,
 			},
 			false,
-			nil,
 			cor.cfg.SyncAttributes)
 
 		cor.pTicker = &timeutils.PolicyTicker{OnTickFunc: cor.traceTracker.Purge}

@@ -67,7 +67,7 @@ func Test_signalfxeceiver_New(t *testing.T) {
 			name: "happy_path",
 			args: args{
 				config: Config{
-					HTTPServerSettings: confighttp.HTTPServerSettings{
+					HTTPServerConfig: confighttp.HTTPServerConfig{
 						Endpoint: "localhost:1234",
 					},
 				},
@@ -344,6 +344,7 @@ func Test_sfxReceiver_handleReq(t *testing.T) {
 
 			resp := w.Result()
 			respBytes, err := io.ReadAll(resp.Body)
+			defer resp.Body.Close()
 			assert.NoError(t, err)
 
 			var bodyStr string
@@ -521,6 +522,7 @@ func Test_sfxReceiver_handleEventReq(t *testing.T) {
 			resp := w.Result()
 			respBytes, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
+			defer resp.Body.Close()
 
 			var bodyStr string
 			assert.NoError(t, json.Unmarshal(respBytes, &bodyStr))
@@ -534,7 +536,7 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 	addr := testutil.GetAvailableLocalAddress(t)
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = addr
-	cfg.HTTPServerSettings.TLSSetting = &configtls.TLSServerSetting{
+	cfg.HTTPServerConfig.TLSSetting = &configtls.TLSServerSetting{
 		TLSSetting: configtls.TLSSetting{
 			CertFile: "./testdata/server.crt",
 			KeyFile:  "./testdata/server.key",
@@ -548,7 +550,7 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 		require.NoError(t, r.Shutdown(context.Background()))
 	}()
 
-	mh := newAssertNoErrorHost(t)
+	mh := componenttest.NewNopHost()
 	require.NoError(t, r.Start(context.Background(), mh), "should not have failed to start metric reception")
 
 	// If there are errors reported through host.ReportFatalError() this will retrieve it.
@@ -600,6 +602,7 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 
 	resp, err := client.Do(req)
 	require.NoErrorf(t, err, "should not have failed when sending to signalFx receiver %v", err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	t.Log("SignalFx Request Received")
 
@@ -664,6 +667,7 @@ func Test_sfxReceiver_DatapointAccessTokenPassthrough(t *testing.T) {
 			resp := w.Result()
 			respBytes, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
+			defer resp.Body.Close()
 
 			var bodyStr string
 			assert.NoError(t, json.Unmarshal(respBytes, &bodyStr))
@@ -742,6 +746,7 @@ func Test_sfxReceiver_EventAccessTokenPassthrough(t *testing.T) {
 			resp := w.Result()
 			respBytes, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
+			defer resp.Body.Close()
 
 			var bodyStr string
 			assert.NoError(t, json.Unmarshal(respBytes, &bodyStr))
@@ -813,24 +818,6 @@ func (b badReqBody) Read(_ []byte) (n int, err error) {
 
 func (b badReqBody) Close() error {
 	return nil
-}
-
-// assertNoErrorHost implements a component.Host that asserts that there were no errors.
-type assertNoErrorHost struct {
-	component.Host
-	*testing.T
-}
-
-// newAssertNoErrorHost returns a new instance of assertNoErrorHost.
-func newAssertNoErrorHost(t *testing.T) component.Host {
-	return &assertNoErrorHost{
-		Host: componenttest.NewNopHost(),
-		T:    t,
-	}
-}
-
-func (aneh *assertNoErrorHost) ReportFatalError(err error) {
-	assert.NoError(aneh, err)
 }
 
 func strPtr(s string) *string {

@@ -39,7 +39,7 @@ func TestLoad_DeprecatedIndexConfigOption(t *testing.T) {
 		LogsIndex:   "logs-generic-default",
 		TracesIndex: "traces-generic-default",
 		Pipeline:    "mypipeline",
-		HTTPClientSettings: HTTPClientSettings{
+		HTTPClientConfig: HTTPClientConfig{
 			Authentication: AuthenticationSettings{
 				User:     "elastic",
 				Password: "search",
@@ -67,6 +67,11 @@ func TestLoad_DeprecatedIndexConfigOption(t *testing.T) {
 			Dedup: true,
 			Dedot: true,
 		},
+		LogstashFormat: LogstashFormatSettings{
+			Enabled:         false,
+			PrefixSeparator: "-",
+			DateFormat:      "%Y.%m.%d",
+		},
 	})
 }
 
@@ -75,6 +80,10 @@ func TestLoadConfig(t *testing.T) {
 
 	defaultCfg := createDefaultConfig()
 	defaultCfg.(*Config).Endpoints = []string{"https://elastic.example.com:9200"}
+
+	defaultLogstashFormatCfg := createDefaultConfig()
+	defaultLogstashFormatCfg.(*Config).Endpoints = []string{"http://localhost:9200"}
+	defaultLogstashFormatCfg.(*Config).LogstashFormat.Enabled = true
 
 	tests := []struct {
 		configFile string
@@ -101,7 +110,7 @@ func TestLoadConfig(t *testing.T) {
 				LogsIndex:   "logs-generic-default",
 				TracesIndex: "trace_index",
 				Pipeline:    "mypipeline",
-				HTTPClientSettings: HTTPClientSettings{
+				HTTPClientConfig: HTTPClientConfig{
 					Authentication: AuthenticationSettings{
 						User:     "elastic",
 						Password: "search",
@@ -128,6 +137,11 @@ func TestLoadConfig(t *testing.T) {
 					Mode:  "ecs",
 					Dedup: true,
 					Dedot: true,
+				},
+				LogstashFormat: LogstashFormatSettings{
+					Enabled:         false,
+					PrefixSeparator: "-",
+					DateFormat:      "%Y.%m.%d",
 				},
 			},
 		},
@@ -146,7 +160,7 @@ func TestLoadConfig(t *testing.T) {
 				LogsIndex:   "my_log_index",
 				TracesIndex: "traces-generic-default",
 				Pipeline:    "mypipeline",
-				HTTPClientSettings: HTTPClientSettings{
+				HTTPClientConfig: HTTPClientConfig{
 					Authentication: AuthenticationSettings{
 						User:     "elastic",
 						Password: "search",
@@ -174,7 +188,17 @@ func TestLoadConfig(t *testing.T) {
 					Dedup: true,
 					Dedot: true,
 				},
+				LogstashFormat: LogstashFormatSettings{
+					Enabled:         false,
+					PrefixSeparator: "-",
+					DateFormat:      "%Y.%m.%d",
+				},
 			},
+		},
+		{
+			id:         component.NewIDWithName(metadata.Type, "logstash_format"),
+			configFile: "config.yaml",
+			expected:   defaultLogstashFormatCfg,
 		},
 	}
 
