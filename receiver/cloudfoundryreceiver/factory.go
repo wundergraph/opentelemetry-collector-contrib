@@ -34,16 +34,16 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		RLPGateway: RLPGatewayConfig{
-			HTTPClientConfig: confighttp.HTTPClientConfig{
+			ClientConfig: confighttp.ClientConfig{
 				Endpoint: defaultURL,
-				TLSSetting: configtls.TLSClientSetting{
+				TLSSetting: configtls.ClientConfig{
 					InsecureSkipVerify: false,
 				},
 			},
 			ShardID: defaultRLPGatewayShardID,
 		},
 		UAA: UAAConfig{
-			LimitedHTTPClientConfig: LimitedHTTPClientConfig{
+			LimitedClientConfig: LimitedClientConfig{
 				Endpoint: defaultURL,
 				TLSSetting: LimitedTLSClientSetting{
 					InsecureSkipVerify: false,

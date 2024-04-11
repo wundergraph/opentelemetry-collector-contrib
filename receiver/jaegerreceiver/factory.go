@@ -73,13 +73,13 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		Protocols: Protocols{
-			GRPC: &configgrpc.GRPCServerSettings{
-				NetAddr: confignet.NetAddr{
+			GRPC: &configgrpc.ServerConfig{
+				NetAddr: confignet.AddrConfig{
 					Endpoint:  localhostgate.EndpointForPort(defaultGRPCPort),
-					Transport: "tcp",
+					Transport: confignet.TransportTypeTCP,
 				},
 			},
-			ThriftHTTP: &confighttp.HTTPServerConfig{
+			ThriftHTTP: &confighttp.ServerConfig{
 				Endpoint: localhostgate.EndpointForPort(defaultHTTPPort),
 			},
 			ThriftBinary: &ProtocolUDP{
@@ -112,11 +112,11 @@ func createTracesReceiver(
 	var config configuration
 	// Set ports
 	if rCfg.Protocols.GRPC != nil {
-		config.CollectorGRPCServerSettings = *rCfg.Protocols.GRPC
+		config.GRPCServerConfig = *rCfg.Protocols.GRPC
 	}
 
 	if rCfg.Protocols.ThriftHTTP != nil {
-		config.CollectorHTTPSettings = *rCfg.ThriftHTTP
+		config.HTTPServerConfig = *rCfg.ThriftHTTP
 	}
 
 	if rCfg.Protocols.ThriftBinary != nil {

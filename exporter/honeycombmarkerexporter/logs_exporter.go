@@ -40,7 +40,7 @@ type marker struct {
 type honeycombLogsExporter struct {
 	set                component.TelemetrySettings
 	client             *http.Client
-	httpClientSettings confighttp.HTTPClientConfig
+	httpClientSettings confighttp.ClientConfig
 	apiURL             string
 	apiKey             configopaque.String
 	markers            []marker
@@ -66,7 +66,7 @@ func newHoneycombLogsExporter(set exporter.CreateSettings, config *Config) (*hon
 	}
 	logsExp := &honeycombLogsExporter{
 		set:                telemetrySettings,
-		httpClientSettings: config.HTTPClientConfig,
+		httpClientSettings: config.ClientConfig,
 		apiURL:             config.APIURL,
 		apiKey:             config.APIKey,
 		markers:            markers,
@@ -158,8 +158,8 @@ func (e *honeycombLogsExporter) sendMarker(ctx context.Context, m marker, logRec
 	return nil
 }
 
-func (e *honeycombLogsExporter) start(_ context.Context, host component.Host) (err error) {
-	client, err := e.httpClientSettings.ToClient(host, e.set)
+func (e *honeycombLogsExporter) start(ctx context.Context, host component.Host) (err error) {
+	client, err := e.httpClientSettings.ToClientContext(ctx, host, e.set)
 
 	if err != nil {
 		return err

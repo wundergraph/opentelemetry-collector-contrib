@@ -49,7 +49,7 @@ func TestLoadConfig(t *testing.T) {
 			expected: &Config{
 				Dataset:   "ngnix",
 				Namespace: "eu",
-				HTTPClientConfig: confighttp.HTTPClientConfig{
+				ClientConfig: confighttp.ClientConfig{
 					Endpoint: sampleEndpoint,
 					Timeout:  2 * time.Minute,
 					Headers: map[string]configopaque.String{
@@ -57,7 +57,7 @@ func TestLoadConfig(t *testing.T) {
 					},
 					MaxIdleConns:    &maxIdleConns,
 					IdleConnTimeout: &idleConnTimeout,
-					Auth:            &configauth.Authentication{AuthenticatorID: component.NewID("sample_basic_auth")},
+					Auth:            &configauth.Authentication{AuthenticatorID: component.MustNewID("sample_basic_auth")},
 				},
 				BackOffConfig: configretry.BackOffConfig{
 					Enabled:             true,
@@ -81,7 +81,7 @@ func TestLoadConfig(t *testing.T) {
 				config.Dataset = ""
 				config.Namespace = "eu"
 			}),
-			configValidateAssert: func(t assert.TestingT, err error, i ...any) bool {
+			configValidateAssert: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorContains(t, err, errDatasetNoValue.Error())
 			},
 		},
@@ -92,7 +92,7 @@ func TestLoadConfig(t *testing.T) {
 				config.Dataset = "ngnix"
 				config.Namespace = ""
 			}),
-			configValidateAssert: func(t assert.TestingT, err error, i ...any) bool {
+			configValidateAssert: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorContains(t, err, errNamespaceNoValue.Error())
 			},
 		},
@@ -102,7 +102,7 @@ func TestLoadConfig(t *testing.T) {
 				config.Endpoint = sampleEndpoint
 				config.BulkAction = "delete"
 			}),
-			configValidateAssert: func(t assert.TestingT, err error, i ...any) bool {
+			configValidateAssert: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorContains(t, err, errBulkActionInvalid.Error())
 			},
 		},

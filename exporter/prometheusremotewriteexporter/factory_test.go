@@ -27,10 +27,10 @@ func Test_createDefaultConfig(t *testing.T) {
 func Test_createMetricsExporter(t *testing.T) {
 
 	invalidConfig := createDefaultConfig().(*Config)
-	invalidConfig.HTTPClientConfig = confighttp.HTTPClientConfig{}
+	invalidConfig.ClientConfig = confighttp.ClientConfig{}
 	invalidTLSConfig := createDefaultConfig().(*Config)
-	invalidTLSConfig.HTTPClientConfig.TLSSetting = configtls.TLSClientSetting{
-		TLSSetting: configtls.TLSSetting{
+	invalidTLSConfig.ClientConfig.TLSSetting = configtls.ClientConfig{
+		Config: configtls.Config{
 			CAFile:   "non-existent file",
 			CertFile: "",
 			KeyFile:  "",
@@ -86,6 +86,7 @@ func Test_createMetricsExporter(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
+			assert.NoError(t, exp.Shutdown(context.Background()))
 		})
 	}
 }

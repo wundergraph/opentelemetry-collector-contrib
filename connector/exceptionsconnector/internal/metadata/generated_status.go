@@ -8,10 +8,13 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+var (
+	Type = component.MustNewType("exceptions")
+)
+
 const (
-	Type                     = "exceptions"
-	TracesToMetricsStability = component.StabilityLevelDevelopment
-	TracesToLogsStability    = component.StabilityLevelDevelopment
+	TracesToMetricsStability = component.StabilityLevelAlpha
+	TracesToLogsStability    = component.StabilityLevelAlpha
 )
 
 func Meter(settings component.TelemetrySettings) metric.Meter {

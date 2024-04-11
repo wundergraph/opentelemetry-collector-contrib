@@ -40,7 +40,7 @@ func createDefaultConfig() component.Config {
 	qs.Enabled = false
 	return &Config{
 		QueueSettings: qs,
-		HTTPClientConfig: HTTPClientConfig{
+		ClientConfig: ClientConfig{
 			Timeout: 90 * time.Second,
 		},
 		Index:       "",
@@ -53,7 +53,7 @@ func createDefaultConfig() component.Config {
 			MaxInterval:     1 * time.Minute,
 		},
 		Mapping: MappingsSettings{
-			Mode:  "ecs",
+			Mode:  "none",
 			Dedup: true,
 			Dedot: true,
 		},

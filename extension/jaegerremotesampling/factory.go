@@ -31,13 +31,13 @@ func NewFactory() extension.Factory {
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		HTTPServerConfig: &confighttp.HTTPServerConfig{
+		HTTPServerConfig: &confighttp.ServerConfig{
 			Endpoint: localhostgate.EndpointForPort(5778),
 		},
-		GRPCServerSettings: &configgrpc.GRPCServerSettings{
-			NetAddr: confignet.NetAddr{
+		GRPCServerConfig: &configgrpc.ServerConfig{
+			NetAddr: confignet.AddrConfig{
 				Endpoint:  localhostgate.EndpointForPort(14250),
-				Transport: "tcp",
+				Transport: confignet.TransportTypeTCP,
 			},
 		},
 		Source: Source{},

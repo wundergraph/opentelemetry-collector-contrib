@@ -36,13 +36,13 @@ func TestLoadConfigNewExporter(t *testing.T) {
 		{
 			id: component.NewIDWithName(metadata.Type, "allsettings"),
 			expected: &Config{
-				HTTPClientConfig: confighttp.HTTPClientConfig{
+				ClientConfig: confighttp.ClientConfig{
 					Headers: map[string]configopaque.String{
 						"X-Custom-Header": "loki_rocks",
 					},
 					Endpoint: "https://loki:3100/loki/api/v1/push",
-					TLSSetting: configtls.TLSClientSetting{
-						TLSSetting: configtls.TLSSetting{
+					TLSSetting: configtls.ClientConfig{
+						Config: configtls.Config{
 							CAFile:   "/var/lib/mycert.pem",
 							CertFile: "certfile",
 							KeyFile:  "keyfile",
@@ -110,7 +110,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Config is valid",
 			cfg: &Config{
-				HTTPClientConfig: confighttp.HTTPClientConfig{
+				ClientConfig: confighttp.ClientConfig{
 					Endpoint: "https://loki.example.com",
 				},
 			},

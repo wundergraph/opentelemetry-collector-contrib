@@ -7,15 +7,8 @@ package fileconsumer // import "github.com/open-telemetry/opentelemetry-collecto
 
 import (
 	"context"
-
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/fileconsumer/internal/reader"
 )
 
-func (m *Manager) preConsume(_ context.Context, _ []*reader.Reader) {
-}
-
-// On windows, we close files immediately after reading because they cannot be moved while open.
-func (m *Manager) postConsume(readers []*reader.Reader) {
-	m.previousPollFiles = readers
-	m.closePreviousFiles()
+// Noop on windows because we close files immediately after reading.
+func (m *Manager) readLostFiles(ctx context.Context) {
 }

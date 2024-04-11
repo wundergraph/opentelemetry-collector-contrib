@@ -15,7 +15,7 @@ import (
 
 // Config defines configuration for Sumo Logic exporter.
 type Config struct {
-	confighttp.HTTPClientConfig  `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
+	confighttp.ClientConfig      `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
 	exporterhelper.QueueSettings `mapstructure:"sending_queue"`
 	configretry.BackOffConfig    `mapstructure:"retry_on_failure"`
 
@@ -60,11 +60,11 @@ type Config struct {
 	Client string `mapstructure:"client"`
 }
 
-// createDefaultHTTPClientConfig returns default http client settings
-func createDefaultHTTPClientConfig() confighttp.HTTPClientConfig {
-	return confighttp.HTTPClientConfig{
-		Timeout: defaultTimeout,
-	}
+// createDefaultClientConfig returns default http client settings
+func createDefaultClientConfig() confighttp.ClientConfig {
+	config := confighttp.NewDefaultClientConfig()
+	config.Timeout = defaultTimeout
+	return config
 }
 
 // LogFormatType represents log_format
@@ -148,7 +148,7 @@ func (cfg *Config) Validate() error {
 		return fmt.Errorf("unexpected compression encoding: %s", cfg.CompressEncoding)
 	}
 
-	if len(cfg.HTTPClientConfig.Endpoint) == 0 {
+	if len(cfg.ClientConfig.Endpoint) == 0 {
 		return errors.New("endpoint is not set")
 	}
 

@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/processortest"
 	"go.opentelemetry.io/otel/attribute"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata/metricdatatest"
 
@@ -20,8 +20,8 @@ import (
 )
 
 type testTelemetry struct {
-	reader        *sdkmetric.ManualReader
-	meterProvider *sdkmetric.MeterProvider
+	reader        *metric.ManualReader
+	meterProvider *metric.MeterProvider
 }
 
 type expectedMetrics struct {
@@ -40,10 +40,10 @@ func telemetryTest(t *testing.T, name string, testFunc func(t *testing.T, tel te
 }
 
 func setupTelemetry() testTelemetry {
-	reader := sdkmetric.NewManualReader()
+	reader := metric.NewManualReader()
 	return testTelemetry{
 		reader:        reader,
-		meterProvider: sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader)),
+		meterProvider: metric.NewMeterProvider(metric.WithReader(reader)),
 	}
 }
 
@@ -60,7 +60,7 @@ func (tt *testTelemetry) assertMetrics(t *testing.T, expected expectedMetrics) {
 	require.NoError(t, tt.reader.Collect(context.Background(), &md))
 
 	if expected.metricDataPointsFiltered > 0 {
-		name := "processor/filter/datapoints.filtered"
+		name := "processor_filter_datapoints.filtered"
 		got := tt.getMetric(name, md)
 		want := metricdata.Metrics{
 			Name:        name,
@@ -80,7 +80,7 @@ func (tt *testTelemetry) assertMetrics(t *testing.T, expected expectedMetrics) {
 		metricdatatest.AssertEqual(t, want, got, metricdatatest.IgnoreTimestamp())
 	}
 	if expected.logsFiltered > 0 {
-		name := "processor/filter/logs.filtered"
+		name := "processor_filter_logs.filtered"
 		got := tt.getMetric(name, md)
 		want := metricdata.Metrics{
 			Name:        name,
@@ -100,7 +100,7 @@ func (tt *testTelemetry) assertMetrics(t *testing.T, expected expectedMetrics) {
 		metricdatatest.AssertEqual(t, want, got, metricdatatest.IgnoreTimestamp())
 	}
 	if expected.spansFiltered > 0 {
-		name := "processor/filter/spans.filtered"
+		name := "processor_filter_spans.filtered"
 		got := tt.getMetric(name, md)
 		want := metricdata.Metrics{
 			Name:        name,

@@ -43,8 +43,8 @@ func TestOAuthClientSettings(t *testing.T) {
 				TokenURL:       "https://example.com/v1/token",
 				Scopes:         []string{"resource.read"},
 				Timeout:        2,
-				TLSSetting: configtls.TLSClientSetting{
-					TLSSetting: configtls.TLSSetting{
+				TLSSetting: configtls.ClientConfig{
+					Config: configtls.Config{
 						CAFile:   testCAFile,
 						CertFile: testCertFile,
 						KeyFile:  testKeyFile,
@@ -64,8 +64,8 @@ func TestOAuthClientSettings(t *testing.T) {
 				TokenURL:     "https://example.com/v1/token",
 				Scopes:       []string{"resource.read"},
 				Timeout:      2,
-				TLSSetting: configtls.TLSClientSetting{
-					TLSSetting: configtls.TLSSetting{
+				TLSSetting: configtls.ClientConfig{
+					Config: configtls.Config{
 						CAFile:   testCAFile,
 						CertFile: "doestexist.cert",
 						KeyFile:  testKeyFile,
@@ -290,7 +290,7 @@ func TestOAuth2PerRPCCredentials(t *testing.T) {
 }
 
 func TestFailContactingOAuth(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(200)
 		_, err := w.Write([]byte("not-json"))
 		assert.NoError(t, err)
@@ -316,14 +316,14 @@ func TestFailContactingOAuth(t *testing.T) {
 	assert.Contains(t, err.Error(), serverURL.String())
 
 	// Test for HTTP connections
-	setting := confighttp.HTTPClientConfig{
+	setting := confighttp.ClientConfig{
 		Endpoint: "http://example.com/",
 		CustomRoundTripper: func(next http.RoundTripper) (http.RoundTripper, error) {
 			return oauth2Authenticator.roundTripper(next)
 		},
 	}
 
-	client, _ := setting.ToClient(componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
+	client, _ := setting.ToClientContext(context.Background(), componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	req, err := http.NewRequest("POST", setting.Endpoint, nil)
 	assert.NoError(t, err)
 	_, err = client.Do(req)
