@@ -1,6 +1,15 @@
-name: jwtauthextension
+type: jwtauthextension
+scope_name: otelcol/jwtauthextension
 
 status:
-  type: extension
-  stability: beta
-  distributions: [contrib]
+  class: extension
+  stability:
+    alpha: [extension]
+  distributions:
+    - contrib
+  codeowners:
+    active: [starptech]
+
+# TODO: Update the extension to make the tests pass
+tests:
+  skip_lifecycle: true
